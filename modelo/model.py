@@ -13,8 +13,8 @@ def criar_tabela():
             CREATE TABLE IF NOT EXISTS produtos(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL,
-                preco TEXT NOT NULL,                         
-                qtd TEXT NOT NULL 
+                preco FLOAT NOT NULL,                         
+                qtd INT NOT NULL 
     )""")
         
         
@@ -22,7 +22,7 @@ def criar_tabela():
     except sqlite3.Error as erro:
         print(f"OCORREU UM ERRO: {erro}")   
 
-def incerir_produto(nome, preco, qtd):
+def inserir_produto(nome, preco, qtd):
     try:    
         with conectar() as conexao:
             cursor = conexao.cursor()
@@ -76,6 +76,6 @@ def excluir_produto(id_produtos):
 
 if __name__ == "__main__":
     criar_tabela() 
-    incerir_produto("pc gamer", 10000.98, 20 )
-    atualizar_preco(2.000, 2)
-    excluir_produto()
+    # inserir_produto("pc gamer", 10000.98, 20 )
+    # atualizar_preco(2.000, 2)
+    # excluir_produto(5)
