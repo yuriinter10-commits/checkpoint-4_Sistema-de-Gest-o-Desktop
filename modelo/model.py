@@ -76,6 +76,6 @@ def excluir_produto(id_produtos):
 
 if __name__ == "__main__":
     criar_tabela() 
-    # inserir_produto("pc gamer", 10000.98, 20 )
-    # atualizar_preco(2.000, 2)
-    # excluir_produto(5)
+    #inserir_produto("Cadeira gamer", 44.98, 20 )
+    atualizar_preco(89.70, 3 )
+    #excluir_produto()
