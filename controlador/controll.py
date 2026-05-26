@@ -1,86 +1,78 @@
 import sys
 import os
 
-# Adiciona a pasta pai (raiz do projeto) ao caminho de busca do Python
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from modelo.model import inserir_produto
+from modelo.model import (inserir_produto, buscar_produtos, atualizar_preco,
+                           excluir_produto, criar_tabela, registrar_venda,
+                           buscar_vendas, buscar_vendas_por_produto)  
+
+def dados_dashboard():
+    resultados = buscar_vendas_por_produto()
+    return [
+        {"nome": row[0], "quantidade": row[1], "faturamento": row[2]}
+        for row in resultados
+    ]
+
+criar_tabela()
+
 
 def cadastrar_validar_cadastro(nome, preco, qtd):
     if nome.strip() == "":
-        print("Erro: Nome está vazio!")
-        return False
+        return False, "Erro: Nome está vazio!"
     try:
-        # CORRIGIDO: Agora converte corretamente os valores recebidos
         preco_convertido = float(preco)
         qtd_convertida = int(qtd)
-        return True 
-        
     except ValueError:
-        # CORRIGIDO: Primeiro printa a mensagem, depois retorna False
-        print("ERRO: Digite apenas numeros")
-        return False
+        return False, "ERRO: Digite apenas números para preço e quantidade."
 
- 
-# Lista global para simular o banco de dados temporário
-lista_produto = [
-    {"id": 1, "nome": "Teclado", "qtd": 1, "preco": 1000},
-    {"id": 2, "nome": "Mouse", "qtd": 1, "preco": 1000}
-]
-proximo_id = 3  # Controla o autoincremento para novos cadastros
+    sucesso = inserir_produto(nome, preco_convertido, qtd_convertida)
+
+    if sucesso:
+        return True, f"Produto '{nome}' cadastrado com sucesso!"
+    else:
+        return False, "Erro ao salvar no banco de dados."
 
 
-def listar(lista_produto):
-    if not lista_produto:
-        print("Nenhum produto cadastrado.")
-        return []
-    
-    print("\n--- LISTA DE PRODUTOS ---")
-    for produto in lista_produto:
-        print(f"ID: {produto['id']} | Nome: {produto['nome']} | Quantidade: {produto['qtd']} | Preço: {produto['preco']}")
-    
-    return lista_produto
+def listar_produto():
+    resultados = buscar_produtos()
+    return [
+        {"id": row[0], "nome": row[1], "preco": row[2], "qtd": row[3]}
+        for row in resultados
+    ]
 
 
-def buscar(id_produto):
-    for produto in lista_produto:
-        if produto["id"] == int(id_produto):
-            print(f"Produto encontrado: {produto['nome']}")
-            return produto
-            
-    # Mapeado para fora do 'for'. 
-    # Só vai rodar isso se o 'for' terminar e não achar nenhum produto.
-    print(f"Produto com ID {id_produto} não foi encontrado.")
-    return None
-   
-
-def editar(id_produto, novos_dados):
-    produto = buscar(id_produto)
-    if produto:
-        # Atualiza apenas os campos que foram enviados em 'novos_dados'
-        for chave, valor in novos_dados.items():
-            if chave in produto:
-                produto[chave] = valor
-        print(f"Produto ID {id_produto} atualizado com sucesso!")
-        return True
-        
-    return False
+def editar_produto(id_produto, novo_preco):
+    return atualizar_preco(novo_preco, id_produto)
 
 
-def excluir(id_produto):
-    produto = buscar(id_produto)
-    if produto:
-        lista_produto.remove(produto)
-        print(f"Produto ID {id_produto} excluído com sucesso!")
-        return True
-        
-    return False
+def excluir_produto_ctrl(id_produto):
+    return excluir_produto(id_produto)
 
-# --- APENAS PARA TESTAR SE ESTÁ FUNCIONANDO ---
-if __name__ == "__main__":
-    # Testando a função listar
-    listar(lista_produto)
-    
-    # Testando a função buscar
-    print("\nTestando a busca:")
-    buscar(3)
+
+# valida e repassa a venda para o model
+def realizar_venda(id_produto, quantidade):
+    try:
+        qtd = int(quantidade)
+        if qtd <= 0:
+            return False, "A quantidade deve ser maior que zero."
+    except ValueError:
+        return False, "ERRO: Digite apenas números para quantidade."
+
+    return registrar_venda(id_produto, qtd)
+
+
+# retorna histórico formatado
+def listar_vendas():
+    resultados = buscar_vendas()
+    return [
+        {
+            "id": row[0],
+            "id_produto": row[1],
+            "nome_produto": row[2],
+            "quantidade": row[3],
+            "valor_total": row[4],
+            "data_venda": row[5]
+        }
+        for row in resultados
+    ]
